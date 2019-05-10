@@ -1,6 +1,14 @@
+var PulseLoader = VueSpinner.PulseLoader
+var ClipLoader = VueSpinner.ClipLoader
+
 const app = new Vue({
   el : '#app',
+  components: {
+    PulseLoader,
+    ClipLoader,
+  },
   data : {
+
     quote : '',
     textColor : '#ffffff',
     weight: 'normal',
@@ -8,16 +16,27 @@ const app = new Vue({
     x: 0,
     y: 0,
     file: [],
-  },
 
+    quote : null,
+    isLoading: false,
+  },
+  mounted() {
+    this.generateQuote()
+
+  },
   methods : {
     generateQuote() {
+      this.isLoading = true;
+      this.quote = null
+
       axios({
         method: 'get',
         url: 'https://quota.glitch.me/random'
       })
-      .then(response => {
-        console.log(response)
+      .then(({data}) => {
+        console.log(data)
+        this.quote = data.quoteText
+        this.isLoading = false;
       })
       .catch(err => {
         console.log(err)
