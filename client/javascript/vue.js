@@ -37,9 +37,4 @@ const app = new Vue({
   computed : {
 
   },
-
-  created() {
-      console.log('hai');
-      
-  }
 })
