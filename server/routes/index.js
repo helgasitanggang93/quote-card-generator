@@ -5,10 +5,14 @@ images = require('../helpers/images')
 router.get('/', (req, res, next) => {
   res.send('Welcome to Quote Generator!')
 })
+
 router.post('/upload',
-  images.multer.single(['image']), 
+  images.saveImage,
   images.sendUploadToGCS,
   (req, res) => {
+    console.log(req.file.cloudStoragePublicUrl);
+        
+    //nanti
     res.send({
       status: 200,
       message: 'Your file is successfully uploaded',
