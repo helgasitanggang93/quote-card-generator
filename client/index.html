@@ -22,7 +22,7 @@
             <br>
             <br>
               <label class="btn btn-primary" for="my-file-selector">
-                  <input id="my-file-selector" type="file" style="display:none" 
+                  <input v-on:change="previewFile" ref="myFile" id="my-file-selector" type="file" style="display:none" 
                   onchange="$('#upload-file-info').html(this.files[0].name)">
                   Choose Image
               </label>  
@@ -32,25 +32,51 @@
         </div>
 
         <div class="container mt-5 border d-flex justify-content-center">
-          <div class=""> 
-            <div style=" width: 640px; height: 640px; background-image: url('https://images.pexels.com/photos/36717/amazing-animal-beautiful-beautifull.jpg?cs=srgb&dl=dawn-hd-wallpaper-landscape-36717.jpg&fm=jpg'); background-size:640px 640px">
+          <div id="capture" class="">
+            <div :style="{ width: '640px', height: '640px', backgroundSize:'640px 640px', backgroundImage: 'url('+file+')'}">
               <div class="container p-5">
+                
                 <pulse-loader :loading="isLoading"  :size="'100px'"></pulse-loader>
-                <h1 class="text-light" v-if="!isLoading">{{quote}}</h1>
+                <h1 v-bind:style="{color:textColor, marginTop:x+'px', marginLeft:y+'px', fontWeight:weight, fontStyle:style}" class="text-light" v-if="!isLoading">{{quote}}</h1>
+              
               </div>
             </div>
           </div>
         </div>
         
+
+        <div id="menu" style="position: absolute; margin-top:-260px; margin-left:740px; color: white; background-color: rgba(0, 0, 0, 0.52); padding:20px; height: 240px">
+            <label>Change text color</label>
+            <br>
+            <input v-model="textColor" type="color" class="mb-3"></input>
+            <div class="mb-5">
+              <label>Change position</label>
+              <br>
+              <button v-on:click.prevent="setPosition('up')"><i class="fas fa-chevron-up"></i></button>
+              <button v-on:click.prevent="setPosition('right')"><i class="fas fa-chevron-right"></i></button>
+              <button v-on:click.prevent="setPosition('down')"><i class="fas fa-chevron-down"></i></button>
+              <button v-on:click.prevent="setPosition('left')"><i class="fas fa-chevron-left"></i></button>
+              <br>
+              <div class="container justify-content-center mt-2">
+                <button v-on:click.prevent="weight='bold'"type="button" class="btn btn-dark btn-sm">Bold</button>
+                <button v-on:click.prevent="style='italic'" type="button" class="btn btn-info btn-sm">Italic</button>
+                <br>
+                <button v-on:click.prevent="weight='normal'; style='normal'" type="button" class="btn btn-light small btn-sm">Normal</button>
+              </div>
+            </div>
+          </div>
+
         <div class="mt-3 mb-5">
-          <button v-on:click.prevent="generateQuote" type="button" class="btn btn-dark">Generate Quote</button>
-          <button v-on:click.prevent="" type="button" class="btn btn-primary">Save Card</button>
+          <button v-on:click.prevent="generateQuote" type="button" class="btn btn-dark mb-3">Generate Quote</button>
+          <br>
+          <a id="test"></a>
+          <button v-on:click.prevent="saveCard" type="button" class="btn btn-primary">Save Card</button>
         </div>
 
         <div class="mt-5">
           <h3>Saved quote card list</h3>
           <div class="container mt-5 mb-5 border d-flex justify-content-center">
-            <card/>
+            <card style="margin: 20px 20px"/>
           </div>
         </div>
     </div>
@@ -65,6 +91,10 @@
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js"></script>
   <script src="./javascript/components/vue-spinner.min.js"></script>
   <script src="./javascript/components/img-card.js"></script>
+  <script src="./javascript/html2canvas.min.js"></script>
+  <script src="./javascript/index.js"></script>
   <script src="./javascript/vue.js"></script>
+
+
 </body>
 </html>
