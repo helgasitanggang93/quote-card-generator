@@ -9,6 +9,7 @@ const app = new Vue({
   },
   data : {
     quote : '',
+    cards: [],
     textColor : '#ffffff',
     weight: 'normal',
     style: 'normal',
@@ -19,10 +20,21 @@ const app = new Vue({
     image: '',
   },
   mounted() {
-    this.generateQuote()
-
+    this.getCards()
   },
   methods: {
+    getCards() {
+      axios({
+        method: 'get',
+        url: 'http://localhost:3000/cards'
+      })
+      .then(({data}) => {
+        this.cards = data
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    },
     generateQuote() {
       this.isLoading = true;
       this.quote = null
@@ -46,10 +58,10 @@ const app = new Vue({
         allowTaint : true, 
         })
         .then(canvas => {
-              document.body.appendChild(canvas)
+              //document.body.appendChild(canvas)
               let card = canvas.toDataURL("image/png")
-              console.log(card)
-              // window.location.href=card
+              console.log(typeof card)
+              this.upload(card)
         })
         .catch(err => {
               console.log(err)
@@ -68,7 +80,7 @@ const app = new Vue({
       if(input == 'left') this.y-=10
       console.log(this.x, this.y)
     },
-    
+
      onFileChange(e){
          let files = e.target.files || e.dataTransfer.files;
              if (!files.length)
@@ -84,12 +96,9 @@ const app = new Vue({
          };
          reader.readAsDataURL(file);
      },
-     upload(){
-         let fileString = this.image.toString()
-         let name = this.file.name.substring(0, this.file.name.indexOf('.'))
-
-         console.log(fileString);
-         console.log('======', name);
+     upload(card){
+         this.isLoading = true;
+         let fileString = card.toString()
          let extension =  '.' + fileString.substring(fileString.indexOf('/')+1, fileString.indexOf(';'))
 
          if(extension === '.') {
@@ -100,15 +109,18 @@ const app = new Vue({
              url: 'http://localhost:3000/upload',
              method: 'POST',
              data: {
-                 image: this.image,
-                 name: name,
+                 image: card,
+                 name: '',
                  extension: extension,
              }
          })
          .then(({data})=> {
-             console.log(data.link)
-             this.image= ''
-             this.file = ''
+            this.getCards()
+            this.cards.unshift(data.card)
+            this.file = []
+            this.quote = ''
+            this.isLoading = false;
+            window.location.href='http://localhost:8080/#cardlist'
          })
          .catch(err =>{
              console.log(err)
@@ -120,8 +132,12 @@ const app = new Vue({
   },
 
   created() {
-      // console.log('hai');
-      console.log(this.file)
-      
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
   }
 })

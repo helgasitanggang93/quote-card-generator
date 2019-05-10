@@ -23,7 +23,7 @@ const saveImage = (req, res, next) => {
     let {image, extension, name} = req.body
 
     const base64Data = image.replace(/^data:image\/png;base64,|^data:image\/jpeg;base64,/, "");
-    const newFilename = Date.now() + '-' + name + extension;
+    const newFilename = Date.now() + extension;
     const newFile = 'uploads/' + newFilename;
 
     fs.writeFile(newFile, base64Data, 'base64', function(err) {
@@ -49,18 +49,18 @@ const sendUploadToGCS = (req, res, next) => {
 
   bucket.upload(req.filepath, {})
       .then(() => {
-        file.makePublic()
-        .then( () => {
+        // file.makePublic()
+        // .then( () => {
           req.file = {}
           let publicName = getPublicUrl(req.filename);
           req.file.cloudStoragePublicUrl = publicName;
 
           console.log('done upload...', req.file.cloudStoragePublicUrl);
           next()
-        })
-        .catch(err => {
-          console.log(err);
-        })
+        // })
+        // .catch(err => {
+        //   console.log(err);
+        // })
       })
 
 }
