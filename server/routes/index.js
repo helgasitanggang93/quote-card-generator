@@ -10,7 +10,7 @@ router.post('/upload',
   images.saveImage,
   images.sendUploadToGCS,
   (req, res) => {
-    console.log(req.file.cloudStoragePublicUrl);
+    console.log('=====',  req.file.cloudStoragePublicUrl);
         
     //nanti
     res.send({

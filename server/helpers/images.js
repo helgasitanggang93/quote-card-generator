@@ -1,12 +1,13 @@
 'use strict'
 require('dotenv').config()
+const fs = require('fs')
 
-const Storage = require('@google-cloud/storage')
+const {Storage} = require('@google-cloud/storage')
 
 const CLOUD_BUCKET = process.env.CLOUD_BUCKET
 console.log(process.env.KEYFILE_PATH)
 
-const storage = Storage({
+const storage = new Storage({
   projectId: process.env.GCLOUD_PROJECT,
   keyFilename: process.env.KEYFILE_PATH
 })
@@ -16,18 +17,16 @@ const getPublicUrl = (filename) => {
   return `https://storage.googleapis.com/${CLOUD_BUCKET}/${filename}`
 }
 
+var fileExt
+
 const saveImage = (req, res, next) => {
-  console.log(req.body);
-  
-  let {image, extension} = req.body
+    let {image, extension, name} = req.body
 
     const base64Data = image.replace(/^data:image\/png;base64,|^data:image\/jpeg;base64,/, "");
-    const newFilename = Date.now() + extension;
+    const newFilename = Date.now() + '-' + name + extension;
     const newFile = 'uploads/' + newFilename;
 
     fs.writeFile(newFile, base64Data, 'base64', function(err) {
-      console.log(newFile);
-      
       if (err) {
         console.log(err);
         res.status(500).json({
@@ -35,42 +34,34 @@ const saveImage = (req, res, next) => {
         });
       } 
       else {
-        req.imagefile = newFile
+        req.filename = newFilename
+        req.filepath = newFile
         next()
       }
     });
 }
 
 const sendUploadToGCS = (req, res, next) => {
-  if (!req.file) {
-    return next()
-  }
+  let gcsname = req.filepath
+  const file = bucket.file(req.filename)
 
-  let gcsname = req.imagefile
-  const file = bucket.file(gcsname)
+  console.log('in senduploaGCS...', file);
 
-  const stream = file.createWriteStream({
-    metadata: {
-      contentType: req.file.mimetype
-    }
-  })
+  bucket.upload(req.filepath, {})
+      .then(() => {
+        file.makePublic()
+        .then( () => {
+          req.file = {}
+          let publicName = getPublicUrl(req.filename);
+          req.file.cloudStoragePublicUrl = publicName;
 
-  stream.on('error', (err) => {
-    console.log('ERROR nembak google ---- ', err)
-    req.file.cloudStorageError = err
-    next(err)
-  })
-
-  stream.on('finish', () => {
-    console.log('sukses')
-    req.file.cloudStorageObject = gcsname
-    file.makePublic().then(() => {
-      req.file.cloudStoragePublicUrl = getPublicUrl(gcsname)
-      next()
-    })
-  })
-
-  stream.end(req.file.buffer)
+          console.log('done upload...', req.file.cloudStoragePublicUrl);
+          next()
+        })
+        .catch(err => {
+          console.log(err);
+        })
+      })
 
 }
 
