@@ -58,7 +58,7 @@ const app = new Vue({
   },
 
   created() {
-      console.log('hai');
+      // console.log('hai');
       console.log(this.file)
       
   }
