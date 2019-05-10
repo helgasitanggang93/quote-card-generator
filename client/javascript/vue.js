@@ -8,23 +8,33 @@ const app = new Vue({
     ClipLoader,
   },
   data : {
-
     quote : '',
+    cards: [],
     textColor : '#ffffff',
     weight: 'normal',
     style: 'normal',
     x: 0,
     y: 0,
     file: [],
-
-    quote : null,
     isLoading: false,
+    image: '',
   },
   mounted() {
-    this.generateQuote()
-
+    this.getCards()
   },
-  methods : {
+  methods: {
+    getCards() {
+      axios({
+        method: 'get',
+        url: 'http://localhost:3000/cards'
+      })
+      .then(({data}) => {
+        this.cards = data
+      })
+      .catch(err => {
+        console.log(err)
+      })
+    },
     generateQuote() {
       this.isLoading = true;
       this.quote = null
@@ -48,10 +58,10 @@ const app = new Vue({
         allowTaint : true, 
         })
         .then(canvas => {
-              document.body.appendChild(canvas)
+              //document.body.appendChild(canvas)
               let card = canvas.toDataURL("image/png")
-              console.log(card)
-              // window.location.href=card
+              console.log(typeof card)
+              this.upload(card)
         })
         .catch(err => {
               console.log(err)
@@ -70,15 +80,64 @@ const app = new Vue({
       if(input == 'left') this.y-=10
       console.log(this.x, this.y)
     },
-  },
 
+     onFileChange(e){
+         let files = e.target.files || e.dataTransfer.files;
+             if (!files.length)
+                 return;
+             this.createImage(files[0]);
+             this.file = this.$refs.file.files[0]
+     },
+     createImage(file) {
+         let reader = new FileReader();
+         reader.onload = (e) => {
+             this.image = e.target.result;
+             console.log(this.image);
+         };
+         reader.readAsDataURL(file);
+     },
+     upload(card){
+         this.isLoading = true;
+         let fileString = card.toString()
+         let extension =  '.' + fileString.substring(fileString.indexOf('/')+1, fileString.indexOf(';'))
+
+         if(extension === '.') {
+           extension = '.png'
+         }
+
+         axios({
+             url: 'http://localhost:3000/upload',
+             method: 'POST',
+             data: {
+                 image: card,
+                 name: '',
+                 extension: extension,
+             }
+         })
+         .then(({data})=> {
+            this.getCards()
+            this.cards.unshift(data.card)
+            this.file = []
+            this.quote = ''
+            this.isLoading = false;
+            window.location.href='http://localhost:8080/#cardlist'
+         })
+         .catch(err =>{
+             console.log(err)
+         })
+     }
+  },
   computed : {
 
   },
 
   created() {
-      // console.log('hai');
-      console.log(this.file)
-      
+      (function(d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) return;
+        js = d.createElement(s); js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.0";
+        fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
   }
 })

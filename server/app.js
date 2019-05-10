@@ -5,8 +5,8 @@ const cors = require('cors')
 const mongoose = require('mongoose')
 const index = require('./routes')
 
-app.use(express.urlencoded({extended: false}))
-app.use(express.json())
+app.use(express.urlencoded({limit: '50mb', extended: false}))
+app.use(express.json({limit: '50mb'}))
 app.use(cors())
 
 mongoose.connect(process.env.DB_URI, {useNewUrlParser: true})

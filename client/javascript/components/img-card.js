@@ -1,12 +1,12 @@
 Vue.component('card', {
-
+  props: ['image'],
   template: `
-  <div class="card" style="width: 18rem; padding:10px">
-    <img class="card-img-top" src="https://images.pexels.com/photos/36717/amazing-animal-beautiful-beautifull.jpg?cs=srgb&dl=dawn-hd-wallpaper-landscape-36717.jpg&fm=jpg" alt="Card image cap">
+  <div class="card" style="padding:10px">
+    <img class="card-img-top" v-bind:src="image" alt="Card image cap">
     <div class="card-body">
       <p class="card-text">Share to :</p>
-      <a href="#" class="btn btn-primary"><i class="fab fa-twitter"></i></a>
-      <a href="#" class="btn btn-primary"><i class="fab fa-facebook-square"></i></a>
+      <a v-bind:href="image" class="fb-share-button" data-href="image" 
+      data-layout="button_count"></a>
     </div>
   </div>
   `
